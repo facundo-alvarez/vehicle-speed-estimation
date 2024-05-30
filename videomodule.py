@@ -4,10 +4,17 @@ from typing import Callable
 import numpy as np
 
 class Video():
-    def __init__(self, input_path:string) -> None:
+    def __init__(self, input_path:string, output_path:string, codec = 'mp4v') -> None:
         self.input_path = input_path
         self.cap = cv2.VideoCapture(self.input_path)
         self.callback = None
+        fourcc = cv2.VideoWriter_fourcc(*codec)
+        self.out = cv2.VideoWriter(
+            output_path, 
+            fourcc,
+            self.cap.get(cv2.CAP_PROP_FPS), 
+            (int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)), 
+            int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
 
     def set_callback(self, callback: Callable[[any], None]) -> None:
         self.callback = callback
@@ -17,6 +24,7 @@ class Video():
 
     def dispose(self) -> None:
         self.cap.release()
+        self.out.release()
 
     @staticmethod
     def resize_image(image, target_size):
@@ -34,6 +42,9 @@ class Video():
         scale_y = nh / h
         
         return new_image, scale_x, scale_y
+    
+    def get_fps(self) -> float:
+        return self.cap.get(cv2.CAP_PROP_FPS)
 
     def get_frames(self) -> None:
         if not self.cap.isOpened():
@@ -50,16 +61,6 @@ class Video():
             
             self.callback(frame)
 
-    def save_frames(self, frames:list, output_path:string, codec = 'mp4'):
-        fourcc = cv2.VideoWriter_fourcc(*codec)
-        out = cv2.VideoWriter(
-            output_path, 
-            fourcc,
-            self.cap.get(cv2.CAP_PROP_FPS), 
-            (int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)), 
-            int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
-        
-        for frame in frames:
-            out.write(frame)
+    def save_frames(self, frame):
+        self.out.write(frame)
 
-        out.release()
