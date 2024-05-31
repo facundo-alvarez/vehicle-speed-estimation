@@ -1,6 +1,7 @@
 from videomodule import Video
 from yolov8 import YoloV8
 from fasterrcnn import FasterRCNN
+from fcos import FCOS
 import cv2
 import numpy as np
 from deepsorttracker import DeepSortTracker
@@ -11,8 +12,9 @@ output_path = 'resources/result.mp4'
 video_module = Video(video_file, output_path)
 
 target_classes = [2, 3, 5, 7]
-model = YoloV8('yolov8n.pt', target_classes)
+# model = YoloV8('yolov8n.pt', target_classes)
 # model = FasterRCNN(target_classes)
+model = FCOS(target_classes)
 
 target_height = 150
 target_width = 28.5
@@ -74,7 +76,7 @@ def get_frame(frame):
         text_cls_conf = 'Cls: ' + str(box_cls) + ' Conf: ' + '{0:.2f}'.format(box_conf)
 
         # Calculate text size
-        text_size_cls_conf = cv2.getTextSize(text_cls_conf, cv2.FONT_HERSHEY_DUPLEX, 0.3, 1)[0]
+        text_size_cls_conf = cv2.getTextSize(text_cls_conf, cv2.FONT_HERSHEY_DUPLEX, 0.2, 1)[0]
         
         # Calculate rectangle dimensions
         rect_width_cls_conf = text_size_cls_conf[0]
@@ -83,11 +85,11 @@ def get_frame(frame):
         cv2.circle(frame, (center_x, bottom_y), 1, orange_color, 5)
 
         # Draw filled rectangle behind text
-        cv2.rectangle(frame, (tl_x - 1, tl_y - 30), (tl_x + 40 + rect_width_cls_conf, tl_y), orange_color, -1)
+        cv2.rectangle(frame, (tl_x - 1, tl_y - 30), (tl_x + 38 + rect_width_cls_conf, tl_y), orange_color, -1)
 
         # Draw text
-        cv2.putText(frame, text_id, (tl_x + 5, tl_y - 20), cv2.FONT_HERSHEY_DUPLEX, 0.4, (0, 0, 0), 1)
-        cv2.putText(frame, text_cls_conf, (tl_x + 5, tl_y - 5), cv2.FONT_HERSHEY_DUPLEX, 0.4, (0, 0, 0), 1)
+        cv2.putText(frame, text_id, (tl_x + 5, tl_y - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 0, 0), 1)
+        cv2.putText(frame, text_cls_conf, (tl_x + 5, tl_y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 0, 0), 1)
 
     
     cv2.imshow('Frame', frame)

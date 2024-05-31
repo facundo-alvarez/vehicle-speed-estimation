@@ -1,13 +1,13 @@
 from objectdetector import ObjectDetector
-from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_ResNet50_FPN_V2_Weights
+from torchvision.models.detection import fcos_resnet50_fpn, FCOS_ResNet50_FPN_Weights
 from PIL import Image
 import numpy as np
 
-class FasterRCNN(ObjectDetector):
+class FCOS(ObjectDetector):
     def __init__(self, target_classes:list) -> None:
         super().__init__(np.array(target_classes) + 1)
-        self.weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
-        self.model = fasterrcnn_resnet50_fpn_v2(weights=self.weights, box_score_thresh=0.5)
+        self.weights = FCOS_ResNet50_FPN_Weights.DEFAULT
+        self.model = fcos_resnet50_fpn(weights=self.weights, box_score_thresh=0.5)
         self.model.eval()
 
     def process_frame(self, frame, scale_x:float, scale_y:float) -> list:
