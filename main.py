@@ -12,9 +12,9 @@ output_path = 'resources/result.mp4'
 video_module = Video(video_file, output_path)
 
 target_classes = [2, 3, 5, 7]
-# model = YoloV8('yolov8n.pt', target_classes)
+model = YoloV8('yolov8n.pt', target_classes)
 # model = FasterRCNN(target_classes)
-model = FCOS(target_classes)
+# model = FCOS(target_classes)
 
 target_height = 150
 target_width = 28.5
@@ -26,6 +26,8 @@ target = np.array([[0, 0], [target_width - 1, 0], [target_width - 1, target_heig
 
 tracker = DeepSortTracker(0.3)
 speed_calculator = SpeedCalculator()
+
+max_speed = 130
 
 m = cv2.getPerspectiveTransform(roi, target)
 
@@ -48,6 +50,8 @@ def get_frame(frame):
     cv2.addWeighted(overlay, overlay_alpha, frame, 1 - overlay_alpha, 0, frame)
    
     orange_color = (0, 165, 255)
+    danger_color = (0, 0, 255)
+
     for index, track in enumerate(tracks):
         tl_x = int(track[0])
         tl_y = int(track[1])
@@ -68,9 +72,13 @@ def get_frame(frame):
 
         # Calculate velocity
         speed = speed_calculator.calculate((id, transformed_center_x, transformed_bottom_y), fps)
+        
+        color = orange_color
+        if speed >= max_speed:
+            color = danger_color
 
         # Draw bounding box
-        cv2.rectangle(frame, (tl_x, tl_y), (br_x, br_y), orange_color, 2)
+        cv2.rectangle(frame, (tl_x, tl_y), (br_x, br_y), color, 2)
 
         text_id = 'ID: ' + str(id) + ' Speed: ' + str(speed)
         text_cls_conf = 'Cls: ' + str(box_cls) + ' Conf: ' + '{0:.2f}'.format(box_conf)
@@ -82,10 +90,10 @@ def get_frame(frame):
         rect_width_cls_conf = text_size_cls_conf[0]
 
         # Draw center point
-        cv2.circle(frame, (center_x, bottom_y), 1, orange_color, 5)
+        cv2.circle(frame, (center_x, bottom_y), 1, color, 5)
 
         # Draw filled rectangle behind text
-        cv2.rectangle(frame, (tl_x - 1, tl_y - 30), (tl_x + 38 + rect_width_cls_conf, tl_y), orange_color, -1)
+        cv2.rectangle(frame, (tl_x - 1, tl_y - 30), (tl_x + 38 + rect_width_cls_conf, tl_y), color, -1)
 
         # Draw text
         cv2.putText(frame, text_id, (tl_x + 5, tl_y - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 0, 0), 1)
