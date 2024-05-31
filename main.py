@@ -80,20 +80,17 @@ def get_frame(frame):
         # Draw bounding box
         cv2.rectangle(frame, (tl_x, tl_y), (br_x, br_y), color, 2)
 
-        text_id = 'ID: ' + str(id) + ' Speed: ' + str(speed)
+        text_id = 'ID: ' + str(id) + ' Speed: ' + str(speed) + 'km/h'
         text_cls_conf = 'Cls: ' + str(box_cls) + ' Conf: ' + '{0:.2f}'.format(box_conf)
 
         # Calculate text size
-        text_size_cls_conf = cv2.getTextSize(text_cls_conf, cv2.FONT_HERSHEY_DUPLEX, 0.2, 1)[0]
+        text_size = cv2.getTextSize(text_id, cv2.FONT_HERSHEY_SIMPLEX, 0.3, 1)[0][0]
         
-        # Calculate rectangle dimensions
-        rect_width_cls_conf = text_size_cls_conf[0]
-
         # Draw center point
         cv2.circle(frame, (center_x, bottom_y), 1, color, 5)
 
         # Draw filled rectangle behind text
-        cv2.rectangle(frame, (tl_x - 1, tl_y - 30), (tl_x + 38 + rect_width_cls_conf, tl_y), color, -1)
+        cv2.rectangle(frame, (tl_x - 1, tl_y - 30), (tl_x + 10 + text_size, tl_y), color, -1)
 
         # Draw text
         cv2.putText(frame, text_id, (tl_x + 5, tl_y - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 0, 0), 1)
