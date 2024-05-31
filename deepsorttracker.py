@@ -24,4 +24,9 @@ class DeepSortTracker(Tracker):
         tracks = self.object_tracker.update_tracks(inside_results, frame=frame)
         tracks = [confirmed_track for confirmed_track in tracks if confirmed_track.is_confirmed() and confirmed_track.time_since_update < 1]
 
-        return [self.__get_ltwh(track) for track in tracks], [track.track_id for track in tracks]
+        ltwh_list = [self.__get_ltwh(track) for track in tracks]
+        track_ids = [track.track_id for track in tracks]
+        det_classes = [track.det_class for track in tracks]
+        det_confs = [track.det_conf for track in tracks]
+
+        return ltwh_list, track_ids, det_classes, det_confs

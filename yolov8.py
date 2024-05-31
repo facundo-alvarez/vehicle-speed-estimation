@@ -1,13 +1,13 @@
 import string
 from ultralytics import YOLO
-import numpy as np
+from objectdetector import ObjectDetector
 
-class YoloV8():
+class YoloV8(ObjectDetector):
     def __init__(self, model:string, target_classes:list) -> None:
+        super().__init__(target_classes)
         self.model = YOLO(model)
-        self.target_classes = target_classes
 
-    def process_frame(self, frame, scale_x, scale_y) -> list:
+    def process_frame(self, frame, scale_x:float, scale_y:float) -> list:
         results = self.model.predict(frame, stream=True)
         result = next(results)
         filter_boxes = [box.numpy() for box in result.boxes if box not in self.target_classes]
@@ -20,7 +20,7 @@ class YoloV8():
                     box.xywh[0][3] / scale_y                           # height
                 ], 
                 box.conf[0],                                           # confidence
-                box.cls[0]                                             # class
+                result.names[box.cls[0]]                               # class
             ) 
             for box in filter_boxes
 ]
