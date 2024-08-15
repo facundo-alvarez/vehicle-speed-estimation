@@ -6,15 +6,17 @@ import cv2
 import numpy as np
 from deepsorttracker import DeepSortTracker
 from speedcalculator import SpeedCalculator
+import time
 
+start = time.perf_counter()
 video_file = 'resources/video.mp4'
 output_path = 'resources/result.mp4'
 video_module = Video(video_file, output_path)
 
 target_classes = [2, 3, 5, 7]
-model = YoloV8('yolov8n.pt', target_classes)
+# model = YoloV8('yolov8n.pt', target_classes)
 # model = FasterRCNN(target_classes)
-# model = FCOS(target_classes)
+model = FCOS(target_classes)
 
 target_height = 150
 target_width = 28.5
@@ -24,10 +26,10 @@ fps = int(video_module.get_fps())
 roi = np.array([[456, 204], [773, 215], [1070, 397], [146, 366]], dtype=np.float32)
 target = np.array([[0, 0], [target_width - 1, 0], [target_width - 1, target_height - 1], [0, target_height - 1]], dtype=np.float32)
 
-tracker = DeepSortTracker(0.3)
+tracker = DeepSortTracker(0.5)
 speed_calculator = SpeedCalculator()
 
-max_speed = 130
+max_speed = 120
 
 m = cv2.getPerspectiveTransform(roi, target)
 
@@ -80,8 +82,8 @@ def get_frame(frame):
         # Draw bounding box
         cv2.rectangle(frame, (tl_x, tl_y), (br_x, br_y), color, 2)
 
-        text_id = 'ID: ' + str(id) + ' Speed: ' + str(speed) + 'km/h'
-        text_cls_conf = 'Cls: ' + str(box_cls) + ' Conf: ' + '{0:.2f}'.format(box_conf)
+        text_id = str(id) + ' / ' + str(speed) + 'km/h'
+        text_cls_conf = str(box_cls) + ' / ' + '{0:.2f}'.format(box_conf)
 
         # Calculate text size
         text_size = cv2.getTextSize(text_id, cv2.FONT_HERSHEY_SIMPLEX, 0.3, 1)[0][0]
@@ -108,3 +110,8 @@ def get_frame(frame):
 video_module.set_callback(get_frame)
 video_module.get_frames()
 cv2.destroyAllWindows()
+
+finish = time.perf_counter()
+
+print('Total time: ' + str(finish - start))
+print('Avg frame time: ' + str(model.get_processing_time_avg()))

@@ -2,18 +2,23 @@ from objectdetector import ObjectDetector
 from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_ResNet50_FPN_V2_Weights
 from PIL import Image
 import numpy as np
+import time
 
 class FasterRCNN(ObjectDetector):
     def __init__(self, target_classes:list) -> None:
         super().__init__(np.array(target_classes) + 1)
         self.weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
-        self.model = fasterrcnn_resnet50_fpn_v2(weights=self.weights, box_score_thresh=0.5)
+        self.model = fasterrcnn_resnet50_fpn_v2(weights=self.weights, box_score_thresh=0.5, box_nms_thresh=0.5)
         self.model.eval()
 
     def process_frame(self, frame, scale_x:float, scale_y:float) -> list:
+        self.count += 1
+        start_time = time.time()
         preprocess = self.weights.transforms()
         img = [preprocess(Image.fromarray(frame))]
         results = self.model(img)[0]
+        end_time = time.time()
+        self.processTime += end_time - start_time
         filter_boxes = []
         for i in range(len(results['boxes'])):
             

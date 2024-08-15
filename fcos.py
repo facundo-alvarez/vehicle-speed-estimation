@@ -2,18 +2,23 @@ from objectdetector import ObjectDetector
 from torchvision.models.detection import fcos_resnet50_fpn, FCOS_ResNet50_FPN_Weights
 from PIL import Image
 import numpy as np
+import time
 
 class FCOS(ObjectDetector):
     def __init__(self, target_classes:list) -> None:
         super().__init__(np.array(target_classes) + 1)
         self.weights = FCOS_ResNet50_FPN_Weights.DEFAULT
-        self.model = fcos_resnet50_fpn(weights=self.weights, box_score_thresh=0.5)
+        self.model = fcos_resnet50_fpn(weights=self.weights, box_score_thresh=0.5, box_nms_thresh=0.5)
         self.model.eval()
 
     def process_frame(self, frame, scale_x:float, scale_y:float) -> list:
+        self.count += 1
+        start_time = time.time()
         preprocess = self.weights.transforms()
         img = [preprocess(Image.fromarray(frame))]
         results = self.model(img)[0]
+        end_time = time.time()
+        self.processTime += end_time - start_time
         filter_boxes = []
         for i in range(len(results['boxes'])):
             
