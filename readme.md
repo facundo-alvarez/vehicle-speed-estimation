@@ -30,7 +30,7 @@ transform.
 pip install -r requirements.txt
 ```
 
-Place an input video at `resources/video.mp4`, then run:
+Use as input video `resources/video.mp4`, then run:
 
 ```bash
 python main.py
